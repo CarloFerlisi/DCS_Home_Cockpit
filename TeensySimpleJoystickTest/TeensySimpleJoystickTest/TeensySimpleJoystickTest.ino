@@ -42,9 +42,9 @@ void loop() {
   Joystick.Y(yTest);
 
   Joystick.button(1, button1);
-  //Joystick.button(2, button2);
-  //Joystick.button(3, button3);
-  //Joystick.button(4, button4);
+  Joystick.button(2, button2);
+  Joystick.button(3, button3);
+  Joystick.button(4, button4);
 
   Joystick.send_now();
   delay(1000);
