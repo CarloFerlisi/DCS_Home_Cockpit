@@ -13,7 +13,7 @@ abstract class ShiftRegister{
     - int clockPin
     - int latchPin
     - int writeDelay
-    - int readDealy
+    - int readDelay
     - bool isInputDevice
     + {abstract} int GetData()
     + {abstract} void WriteData()
