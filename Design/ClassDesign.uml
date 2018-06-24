@@ -1,0 +1,47 @@
+@startuml
+' Class Definition
+' Architecture
+class Singleton
+class List
+
+' Shift Registers
+abstract class ShiftRegister{
+    - int numberOfInputs
+    - int numberOfOutputs
+    - int[] inputPins
+    - int[] outputPins
+    - int clockPin
+    - int latchPin
+    - int writeDelay
+    - int readDealy
+    - bool isInputDevice
+    + {abstract} int GetData()
+    + {abstract} void WriteData()
+}
+
+class ShiftRegisterCascade{
+    - std::list<ShiftRegister> shiftRegisters
+    + void AddShiftRegister(ShiftRegister)
+    + void RemoveShiftRegister(int)
+    + GetShiftRegister(int)
+    + int GetData()
+    + void WriteData()
+}
+
+class SingleInParallelOut{
+    + int GetData()
+    + void WriteData()
+}
+
+class ParallelInSingleOut{
+    + int GetData()
+    + void WriteData()
+}
+
+' Inheritance and Interaction Diagram
+ShiftRegister <|-- SingleInParallelOut
+ShiftRegister <|-- ParallelInSingleOut
+ShiftRegister <|-- ShiftRegisterCascade
+ShiftRegisterCascade o-- ShiftRegister
+
+@enduml
