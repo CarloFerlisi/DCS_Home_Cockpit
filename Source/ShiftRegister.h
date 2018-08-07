@@ -1,56 +1,54 @@
 // ShiftRegister.h
-// 
+//
 // Author : Carlo Ferlisi
+#ifndef _INPUTOUTPUT_SHIFTREGISTER_H_
+#define _INPUTOUTPUT_SHIFTREGISTER_H_
 
-#ifndef INPUTOUTPUT_SHIFTREGISTER
-#define INPUTOUTPUT_SHIFTREGISTER
+namespace InputOutput
+{
 
-#include <list>
+class IShiftRegisterInputManager;
+class IShiftRegisterOutputManager;
 
-namespace InputOutput{
-
+enum DataTransferType 
+{
+    None         = 0
+   ,Serial    // = 1
+   ,Parallel  // = 2
+};
 
 class ShiftRegister
 {
-// Methods
-  private:
-  public:
+public:
+    // Constructors
     ShiftRegister();
-    ShiftRegister(int clockPin, int latchPin, int writeDelay=50, int readDelay=50);
-    ShiftRegister(std::list<int> inputPins, std::list<int> outputPins, int clockPin, int latchPin, int writeDelay=50, int readDelay=50, bool isInputDevice=false);
+
+    // Destructor
     ~ShiftRegister();
 
-    void SetInputPins(std::list<int> inputPinLocations){inputPins = inputPinLocations;}
-    void SetOutputPins(std::list<int> outputPinLocations){outputPins = outputPinLocations;}
-    
-    void SetClockPin(int clockPinLocation){clockPin = clockPinLocation;}
-    void SetLatchPin(int latchPinLocation){latchPin = latchPinLocation;}
+    // Methods
+    void ReadData(unsigned int sizeOfData);                                 // Read data from shift register if output is defined
+    void WriteData(unsigned char dataToWrite[], unsigned int sizeOfData);   // Write data into shift register if input is defined
 
-    void SetWriteDelay(int writeDelay);
-    void SetReadDelay(int readDelay);
+    void SetLatchPin(unsigned int pinLocation);                             // Set the latch pin location
+    void SetClockPin(unsigned int pinLocation);                             // Set the clock pin location
+    void SetDataSize(unsigned int dataSize);
 
-    void SetAsInputRegister(){isInputDevice = true;}
-    void SetAsOutputRegister(){isInputDevice = false;}
+    void SetInput(DataTransferType inputType,   unsigned int *inputPins);   // Set the input type/pin(s)
+    void SetOutput(DataTransferType outputType, unsigned int *outputPins);  // Set the output type/pin(s)
 
-    virtual int  ReadOutput() = 0;
-    virtual void WriteInput() = 0;
+    // Member Variables
+    unsigned int latchPin;                                                  // Location of the latch pin
+    unsigned int clockPin;                                                  // Location of the clock pin
+    unsigned int dataSize;                                                  // Size of the shift register in bits
 
-// Member Variables
-  private:
-    std::list<int> inputPins;
-    std::list<int> outputPins;
+    DataTransferType inputType;                                             // Defines shift register input type
+    DataTransferType outputType;                                            // Defines shift register output type
 
-    int clockPin;
-    int latchPin;
-    int writeDelay;
-    int readDelay;
-
-    bool isInputDevice;
-
+    unsigned int *inputPins;                                                // Location of input pin(s)
+    unsigned int *outputPins;                                               // Location of output pin(s)
 };
 
+} // namespace InputOutput
 
-} // InputOutput
-
-
-#endif //INPUTOUTPUT_SHIFTREGISTER
+#endif _INPUTOUTPUT_SHIFTREGISTER_H_
