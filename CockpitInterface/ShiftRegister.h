@@ -7,8 +7,7 @@
 namespace InputOutput
 {
 
-class IShiftRegisterInputManager;
-class IShiftRegisterOutputManager;
+unsigned int charSize = sizeof(char);
 
 enum DataTransferType 
 {
@@ -19,7 +18,7 @@ enum DataTransferType
 
 class ShiftRegister
 {
-public:
+  public:
     // Constructors
     ShiftRegister();
 
@@ -27,19 +26,24 @@ public:
     ~ShiftRegister();
 
     // Methods
-    void ReadData(unsigned int sizeOfData);                                 // Read data from shift register if output is defined
-    void WriteData(unsigned char dataToWrite[], unsigned int sizeOfData);   // Write data into shift register if input is defined
-
-    void SetLatchPin(unsigned int pinLocation);                             // Set the latch pin location
-    void SetClockPin(unsigned int pinLocation);                             // Set the clock pin location
-    void SetDataSize(unsigned int dataSize);
+    void SetLatchPin(int pinLocation);                                      // Set the latch pin location
+    void SetClockPin(int pinLocation);                                      // Set the clock pin location
+    void SetDataSize(unsigned int dataSize);                                // Set the size of the shift register in bits
 
     void SetInput(DataTransferType inputType,   unsigned int *inputPins);   // Set the input type/pin(s)
     void SetOutput(DataTransferType outputType, unsigned int *outputPins);  // Set the output type/pin(s)
 
+    unsigned char* ReadData(unsigned int dataSize) const;                  // Read data from shift register if output is defined
+    void WriteData(unsigned char dataToWrite[], unsigned int dataSize);   // Write data into shift register if input is defined
+
+  private:
+    void resetInputPins();
+    void resetOutputPins();
+
     // Member Variables
-    unsigned int latchPin;                                                  // Location of the latch pin
-    unsigned int clockPin;                                                  // Location of the clock pin
+  private:
+    int latchPin;                                                           // Location of the latch pin
+    int clockPin;                                                           // Location of the clock pin
     unsigned int dataSize;                                                  // Size of the shift register in bits
 
     DataTransferType inputType;                                             // Defines shift register input type
@@ -51,4 +55,4 @@ public:
 
 } // namespace InputOutput
 
-#endif _INPUTOUTPUT_SHIFTREGISTER_H_
+#endif // _INPUTOUTPUT_SHIFTREGISTER_H_
