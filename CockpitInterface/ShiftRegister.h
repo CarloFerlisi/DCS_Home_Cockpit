@@ -7,8 +7,6 @@
 namespace InputOutput
 {
 
-unsigned int charSize = sizeof(char);
-
 enum DataTransferType 
 {
     None         = 0
@@ -33,8 +31,8 @@ class ShiftRegister
     void SetInput(DataTransferType inputType,   unsigned int *inputPins);   // Set the input type/pin(s)
     void SetOutput(DataTransferType outputType, unsigned int *outputPins);  // Set the output type/pin(s)
 
-    unsigned char* ReadData(unsigned int dataSize) const;                  // Read data from shift register if output is defined
-    void WriteData(unsigned char dataToWrite[], unsigned int dataSize);   // Write data into shift register if input is defined
+    void ReadData(bool dataToRead[], unsigned int dataSize) const; // Read data from shift register if output is defined
+    void WriteData(bool dataToWrite[], unsigned int dataSize);     // Write data into shift register if input is defined
 
   private:
     void resetInputPins();

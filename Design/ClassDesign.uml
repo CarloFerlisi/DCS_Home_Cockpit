@@ -4,44 +4,49 @@
 class Singleton
 class List
 
-' Shift Registers
-abstract class ShiftRegister{
-    - int numberOfInputs
-    - int numberOfOutputs
-    - int[] inputPins
-    - int[] outputPins
-    - int clockPin
-    - int latchPin
-    - int writeDelay
-    - int readDelay
-    - bool isInputDevice
-    + {abstract} int GetData()
-    + {abstract} void WriteData()
-}
-
-class ShiftRegisterCascade{
-    - std::list<ShiftRegister> shiftRegisters
-    + void AddShiftRegister(ShiftRegister)
-    + void RemoveShiftRegister(int)
-    + GetShiftRegister(int)
-    + int GetData()
-    + void WriteData()
-}
-
-class SingleInParallelOut{
-    + int GetData()
-    + void WriteData()
-}
-
-class ParallelInSingleOut{
-    + int GetData()
-    + void WriteData()
-}
-
 ' Inheritance and Interaction Diagram
-ShiftRegister <|-- SingleInParallelOut
-ShiftRegister <|-- ParallelInSingleOut
-ShiftRegister <|-- ShiftRegisterCascade
-ShiftRegisterCascade o-- ShiftRegister
+namespace InputOutput{
+    class ShiftRegisterCascade
 
+    class ShiftRegister{
+        # inputComponent  : *IShiftRegisterInputComponent
+        # outputComponent : *IShiftRegisterOutputComponent
+        # int dataPin 
+        # int latchPin
+        # int clockPin
+
+        + unsigned char* ReadData()
+        + void WriteData(char dataToWrite[])
+
+        + void SetLatchPin(int pinLocation)
+        + void SetClockPin(int pinLocation)
+        + void SetDataPin(int pinLocation)
+
+        + void SetInputComponent(IShiftRegisterInputComponent *inputComponent); 
+        + void SetOutputComponent(IShiftRegisterOutputComponent *outputComponent); 
+    }
+
+    Interface IShiftRegisterInputComponent{
+        {abstract} void WriteData(char dataToWrite[])
+    }
+    Interface IShiftRegisterOutputComponent{
+        {abstract} unsigned char* ReadData()
+    }
+
+    class ShiftRegisterInputComponentSerial
+    class ShiftRegisterInputComponentParallel
+    
+    class ShiftRegisterOutputComponentSerial
+    class ShiftRegisterOutputComponentParallel
+
+    ShiftRegisterCascade *-- ShiftRegister
+
+    ShiftRegister *-- IShiftRegisterInputComponent
+    ShiftRegister *-- IShiftRegisterOutputComponent
+
+    IShiftRegisterInputComponent <|-- ShiftRegisterInputComponentSerial
+    IShiftRegisterInputComponent <|-- ShiftRegisterInputComponentParallel
+
+    IShiftRegisterOutputComponent <|-- ShiftRegisterOutputComponentSerial
+    IShiftRegisterOutputComponent <|-- ShiftRegisterOutputComponentParallel
 @enduml

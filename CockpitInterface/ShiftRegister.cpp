@@ -4,6 +4,7 @@
 //
 
 #include <cstddef>
+#include <Arduino.h>
 
 #include "ShiftRegister.h"
 
@@ -81,20 +82,16 @@ void ShiftRegister::SetOutput(DataTransferType outputType, unsigned int *outputP
     }
 }
 
-unsigned char* ShiftRegister::ReadData(unsigned int dataSize) const
+void ShiftRegister::ReadData(bool dataToRead[], unsigned int dataSize) const
 {
     // Data is transfered byte by byte
     // Array of bytes is therefore used to collect data
-    unsigned char* data = NULL;
 
     // Verify if the size of data to read matches the shift regiser size
-    if (outputType != DataTransferType::None && this->dataSize == dataSize)
+    if (inputType != DataTransferType::None && this->dataSize == dataSize)
     {
-        // Allocate minimum required space
-        data = new unsigned char[(dataSize - 1) / charSize + 1]();
-
         // Read data
-        if (outputType == DataTransferType::Serial)
+        if (inputType == DataTransferType::Serial)
         {
             // Read data from the shift register using a single output pin
             // Based on Carlyn Maw's code, found here : https://www.arduino.cc/en/Tutorial/ShftIn22
@@ -113,29 +110,23 @@ unsigned char* ShiftRegister::ReadData(unsigned int dataSize) const
 
             // Shift the data through the register into the data array
             // The data pin will be set on the rising edge of the clock pin
-            for (int i = 0; i < dataSize; ++i)
+            for (unsigned int i = 0; i < dataSize; ++i)
             {
-                digitalWrite(clockPin, HIGH);
-                delayMicroseconds(2);
-
-                // Write data into appropriate byte and bit
-                if (digitalRead(dataPin))
-                {
-                    data[i / charSize] |= (1 << (i % charSize));
-                }
-
                 digitalWrite(clockPin, LOW);
+                delayMicroseconds(10);
+                // Write data into appropriate byte and bit
+                dataToRead[i] = digitalRead(dataPin);
+                digitalWrite(clockPin, HIGH);
+                
+                delayMicroseconds(10);
             }
         }
-        else if (outputType == DataTransferType::Parallel)
+        else if (inputType == DataTransferType::Parallel)
         {
             // Read data from shift register using multiple output pins
-            for (int i = 0; i < dataSize; ++i)
+            for (unsigned int i = 0; i < dataSize; ++i)
             {
-                if (digitalRead(inputPins[i]))
-                {
-                    data[i / charSize] |= (1 << (i % charSize));
-                }
+                dataToRead[i] = digitalRead(inputPins[i]);
             }
         }
     }
@@ -143,16 +134,14 @@ unsigned char* ShiftRegister::ReadData(unsigned int dataSize) const
     {
         // Placeholder for error checking
     }
-
-    return data;
 }
 
-void ShiftRegister::WriteData(unsigned char dataToWrite[], unsigned int dataSize)
+void ShiftRegister::WriteData(bool dataToWrite[], unsigned int dataSize)
 {
     // Verify if the size of data to be transfered matches the shift register size
-    if (inputType != DataTransferType::None && this->dataSize == dataSize)
+    if (outputType != DataTransferType::None && this->dataSize == dataSize)
     {
-        if (inputType == DataTransferType::Serial)
+        if (outputType == DataTransferType::Serial)
         {
             // Read data from the shift register using a single output pin
             // Based on Carlyn Maw's and Tom Igoe's code, found here : https://www.arduino.cc/en/Tutorial/ShftOut21
@@ -160,37 +149,43 @@ void ShiftRegister::WriteData(unsigned char dataToWrite[], unsigned int dataSize
             unsigned int dataPin = outputPins[0];
 
             // Set pin modes
+            pinMode(latchPin, OUTPUT);
             pinMode(clockPin, OUTPUT);
-            pinMode(dataPin, OUTPUT);
+            pinMode(dataPin,  OUTPUT);
 
-            digitalWrite(dataPin, LOW);
+            digitalWrite(latchPin, LOW);
+            digitalWrite(dataPin,  LOW);
             digitalWrite(clockPin, LOW);
 
-            for (int i = 0; i < dataSize; ++i)
+            for (unsigned int i = 0; i < dataSize; ++i)
             {
                 // Set data pin to data value
-                digitalWrite(dataPin, dataToWrite[i / charSize] & (1 << (i % charSize)));
-
+                digitalWrite(dataPin, dataToWrite[i]);
+                delayMicroseconds(2);
                 // Pulse the clock pin to store the value on the data pin
                 digitalWrite(clockPin, HIGH);
                 digitalWrite(dataPin,  LOW);  // Prevents bleed through
 
                 delayMicroseconds(2);
                 digitalWrite(clockPin, LOW);
+                delayMicroseconds(2);
             }
+
+            digitalWrite(latchPin, HIGH);
+            delayMicroseconds(20);
         }
-        else if (inputType == DataTransferType::Parallel)
+        else if (outputType == DataTransferType::Parallel)
         {
             // Write the data onto the assigned pins
-            for (int i = 0; i < dataSize; ++i)
+            for (unsigned int i = 0; i < dataSize; ++i)
             {
-                digitalWrite(inputPins[i], dataToWrite[i / charSize] & (1 << (i % charSize)));
+                digitalWrite(inputPins[i], dataToWrite[i] & (1 << i));
             }
 
             // Pulse the latch pin to store into the register
             digitalWrite(latchPin, HIGH);
-            delayMicroseconds(20);
-            digitalWrite(latchPin, LOW);
+            // delayMicroseconds(20);
+            // digitalWrite(latchPin, LOW);
         }
     }
     else
